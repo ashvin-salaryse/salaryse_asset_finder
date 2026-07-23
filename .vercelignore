@@ -1,6 +1,9 @@
-# Vercel only HOSTS the prebuilt gallery. The Python scripts are build tooling
-# (run in GitHub Actions, not on Vercel) — excluding them stops Vercel from
-# trying to build a Python app.
-*
-!asset_gallery.html
-!vercel.json
+# Exclude the Python build tooling so Vercel doesn't try to build a Python app.
+# (asset_gallery.html + vercel.json stay, so the static site actually deploys.)
+*.py
+requirements.txt
+refresh.sh
+lottie.min.js
+venv
+.github
+app-repo-notifier
