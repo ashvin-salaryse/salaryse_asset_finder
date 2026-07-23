@@ -71,7 +71,8 @@ def render_batch(chunk, html_path, png_path):
         f.write(doc)
     if os.path.exists(png_path):
         os.remove(png_path)
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-sandbox",
+                    "--disable-dev-shm-usage", "--hide-scrollbars",
                     "--force-device-scale-factor=1", "--default-background-color=00000000",
                     "--virtual-time-budget=60000", f"--screenshot={png_path}",
                     f"--window-size={w},{h}", f"file://{html_path}"],
@@ -246,7 +247,8 @@ def render_lottie_batch(batch, lib, html_path, png_path):
         f.write(doc)
     if os.path.exists(png_path):
         os.remove(png_path)
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-sandbox",
+                    "--disable-dev-shm-usage", "--hide-scrollbars",
                     "--force-device-scale-factor=1", "--default-background-color=00000000",
                     "--virtual-time-budget=30000", f"--screenshot={png_path}",
                     f"--window-size={w},{h}", f"file://{html_path}"],

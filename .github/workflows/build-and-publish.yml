@@ -1,0 +1,75 @@
+name: Build & publish asset gallery
+
+# Regenerates asset_gallery.html from Salaryse/salary_se_app and publishes it to GitHub Pages.
+on:
+  workflow_dispatch:            # manual "Run workflow" button
+  schedule:
+    - cron: "0 3 * * *"         # nightly at 03:00 UTC (keeps it fresh with no app-repo changes)
+  repository_dispatch:          # fired by the app repo when app_images.dart changes (optional)
+    types: [app-images-changed]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout finder repo (scripts)
+        uses: actions/checkout@v4
+
+      - name: Checkout salary_se_app (for app_images.dart)
+        uses: actions/checkout@v4
+        with:
+          repository: Salaryse/salary_se_app
+          ref: development
+          token: ${{ secrets.APP_REPO_TOKEN }}   # PAT / fine-grained token with read access
+          path: salary_se_app
+          sparse-checkout: |
+            lib/util/constants/app_images.dart
+            assets
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: python -m pip install --disable-pip-version-check -r requirements.txt
+
+      - name: Install headless Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Regenerate gallery
+        env:
+          SALARYSE_APP: ${{ github.workspace }}/salary_se_app
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          python precompute_hashes.py
+          python build_gallery.py
+          mkdir -p _site
+          cp asset_gallery.html _site/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

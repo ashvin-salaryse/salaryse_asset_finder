@@ -1,0 +1,28 @@
+# OPTIONAL — copy this into the APP repo at:
+#   Salaryse/salary_se_app/.github/workflows/notify-asset-finder.yml
+#
+# It pings the asset-finder repo to rebuild the gallery, but ONLY when
+# app_images.dart changes on `development`. Without this, the finder repo
+# still rebuilds nightly + on manual dispatch (no app-repo change needed).
+#
+# Requires a secret FINDER_DISPATCH_TOKEN in the APP repo: a token allowed to
+# trigger repository_dispatch on <OWNER>/salaryse_asset_finder.
+
+name: Notify asset finder
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - "lib/util/constants/app_images.dart"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger gallery rebuild
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.FINDER_DISPATCH_TOKEN }}
+          repository: OWNER/salaryse_asset_finder   # <-- set to your finder repo
+          event-type: app-images-changed
