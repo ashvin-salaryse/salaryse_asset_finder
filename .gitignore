@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+# Chrome render intermediates
+_sheet*
+_q.*
+_pt.*
+_lt.*
+# Regenerable build data (recreated by precompute_hashes.py)
+hashes.json
+thumbs.json
+lottie_sigs.json
